@@ -1,0 +1,32 @@
+server:
+  port: @init.port@
+  tomcat:
+    uri-encoding: UTF-8
+
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/{{dbName}}?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: {{dbPwd}}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    initialization-mode: always
+    sql-script-encoding: UTF-8
+  messages:
+    basename: i18n/errors,i18n/messages
+    fallback-to-system-locale: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+pagehelper:
+  helper-dialect: mysql
+
+logging:
+  file:
+    name: logs/@init.serviceName@.log
+  level:
+    com.dream: WARN

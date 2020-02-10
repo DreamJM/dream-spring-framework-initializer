@@ -1,0 +1,65 @@
+apply from: 'config.gradle'
+
+import org.apache.tools.ant.filters.ReplaceTokens
+
+task copyResource(type: Copy) {
+    from 'resource/common'
+    into "dist/${project.ext.service.name}"
+}
+
+task filterResource(type: Copy) {
+    from 'resource/filter'
+    into "dist/${project.ext.service.name}"
+    filter(ReplaceTokens, tokens: ['init.group'              : project.ext.service.group,
+                                   'init.serviceName'        : project.ext.service.name,
+                                   'init.versionCode'        : project.ext.service.versionCode,
+                                   'init.versionId'          : project.ext.service.versionId,
+                                   'init.serverPort'         : project.ext.server.port,
+                                   'init.dbName'             : project.ext.db.name,
+                                   'init.dbPassword'         : project.ext.db.password,
+                                   'init.dbPrefix'           : project.ext.db.prefix,
+                                   'init.spring-boot.version': project.ext.framework.springbootVersion,
+                                   'init.dreamVersion'       : project.ext.framework.dreamVersion])
+}
+
+task copySrcResource(type: Copy) {
+    from 'src/common'
+    into "dist/${project.ext.service.name}/src/main"
+}
+
+task filterSrcResource(type: Copy) {
+    from 'src/filter'
+    into "dist/${project.ext.service.name}/src/main"
+    filter(ReplaceTokens, tokens: ['init.port'        : project.ext.server.port,
+                                   'init.package'     : project.ext.code.package,
+                                   'init.serviceName' : project.ext.service.name,
+                                   'init.serviceTitle': project.ext.service.title,
+                                   'init.dbName'      : project.ext.db.name,
+                                   'init.dbPassword'  : project.ext.db.password,
+                                   'init.dbPrefix'    : project.ext.db.prefix])
+}
+
+task createNewApp(type: Copy, dependsOn: [copyResource, filterResource, copySrcResource, filterSrcResource]) {
+    def camelName = lineToCamel(project.ext.service.name.capitalize())
+    from 'src/main/java'
+    into "dist/${project.ext.service.name}/src/main/java/${project.ext.code.package.replaceAll("[.]", "/")}"
+    rename('Application.java', camelName + 'Application.java')
+    filter(ReplaceTokens, tokens: ['init.camelName': camelName,
+                                   'init.author'   : project.ext.code.author,
+                                   'init.package'  : project.ext.code.package,
+                                   'init.dbPrefix' : project.ext.db.prefix])
+}
+
+task clean(type: Delete) {
+    delete 'dist'
+}
+
+static def lineToCamel(name) {
+    def matcher = name =~ '[_-](\\w)'
+    StringBuffer sb = new StringBuffer()
+    while (matcher.find()) {
+        matcher.appendReplacement(sb, matcher.group(1).toUpperCase())
+    }
+    matcher.appendTail(sb)
+    sb.toString()
+}

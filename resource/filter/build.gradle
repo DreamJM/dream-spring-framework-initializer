@@ -1,0 +1,79 @@
+plugins {
+    id 'org.springframework.boot' version '@init.spring-boot.version@'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+    id 'com.github.spotbugs' version '3.0.0'
+    id 'jacoco'
+}
+
+apply from: 'dream-dependency.gradle'
+apply from: 'release.gradle'
+
+group = '@init.group@'
+version = rootProject.ext.version.code
+sourceCompatibility = '1.8'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // Dream Framework
+    implementation 'com.dream.springframework:dream-spring-starter'
+    implementation 'com.dream.springframework:dream-spring-dao-starter'
+    implementation 'com.dream.springframework:dream-spring-auth-token-starter'
+    implementation 'com.dream.springframework:dream-spring-actionlog-starter'
+
+    // DB
+    implementation('mysql:mysql-connector-java:8.0.16')
+
+    // Logging
+    implementation('org.zalando:logbook-spring-boot-starter:1.13.0')
+
+    // TEST
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+//================= findbugs =================//
+import com.github.spotbugs.SpotBugsTask
+
+spotbugs {
+    toolVersion = '4.0.0-RC3'
+    sourceSets = [sourceSets.main]
+    ignoreFailures = true
+    effort = 'max'
+    reportLevel = 'medium'
+}
+
+tasks.withType(SpotBugsTask) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+        html.stylesheet = resources.text.fromFile(new File(rootDir, 'config/findbugs.xsl'))
+    }
+}
+//=================jacoco =====================//
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = '0.8.5'
+    reportsDir = file("${buildDir}/reports/jacoco")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        csv.enabled = true
+        html.enabled = true
+    }
+    executionData file('build/jacoco/test.exec')
+}
+
+check.dependsOn jacocoTestReport
+

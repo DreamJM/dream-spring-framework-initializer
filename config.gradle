@@ -1,0 +1,7 @@
+ext {
+    service = [group: 'com.dream', name: 'demo', title: 'Demo Applicatoin', versionCode: '1.0.0', versionId: '1000001']
+    framework = [springbootVersion: '2.2.4.RELEASE', dreamVersion: '1.0.0']
+    server = [port: '80']
+    db = [name: 'demo', password: '123456', prefix: 'demo_']
+    code = [author: 'DreamJM', package: 'com.dream.demo']
+}

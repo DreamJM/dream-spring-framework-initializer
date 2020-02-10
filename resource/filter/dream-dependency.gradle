@@ -1,0 +1,16 @@
+ext {
+    dream = [version: '@init.dreamVersion@']
+}
+
+dependencyManagement {
+    dependencies {
+        dependency "com.dream.springframework:dream-spring-base:${project.ext.dream.version}"
+        dependency "com.dream.springframework:dream-spring-starter:${project.ext.dream.version}"
+        dependency "com.dream.springframework:dream-spring-base:${project.ext.dream.version}"
+        dependency "com.dream.springframework:dream-spring-dao:${project.ext.dream.version}"
+        dependency "com.dream.springframework:dream-spring-dao-starter:${project.ext.dream.version}"
+        dependency "com.dream.springframework:dream-spring-auth-base:${project.ext.dream.version}"
+        dependency "com.dream.springframework:dream-spring-auth-token-starter:${project.ext.dream.version}"
+        dependency "com.dream.springframework:dream-spring-actionlog-starter:${project.ext.dream.version}"
+    }
+}

@@ -1,0 +1,88 @@
+ext {
+    version = [code: '@init.versionCode@', id: '@init.versionId@', desc: 'initialization']
+    db = [name: '@init.dbName@', password: '@init.dbPassword@']
+}
+
+//======================= Common Resource ========================//
+import org.apache.tools.ant.filters.ReplaceTokens
+
+processResources {
+    filter(ReplaceTokens, tokens: [dbName   : project.ext.db.name,
+                                   dbPwd    : project.ext.db.password,
+                                   version  : project.ext.version.code,
+                                   versionId: project.ext.version.id,
+                                   desc     : project.ext.version.desc],
+            beginToken: '{{', endToken: '}}')
+}
+
+//======================= Release (Windows) ========================//
+task prepareWinJar(type: Copy, dependsOn: build) {
+    from "${buildDir}/libs"
+    from "runtime/windows/service.exe"
+    into "version/windows/version/${project.name}"
+    rename("^[s]ervice", "${project.name}")
+    rename("${project.name}-${project.ext.version.code}.jar", "${project.name}.jar")
+}
+
+task prepareWinSetup(type: Copy) {
+    from 'runtime/windows/setup'
+    into "version/windows/version/${project.name}"
+    rename("^[s]ervice", "${project.name}")
+    filter(ReplaceTokens, tokens: [projectName: project.name, version: project.ext.version.code])
+}
+
+task prepareWinTools(type: Copy) {
+    from 'runtime/windows/tools'
+    into "version/windows/version/${project.name}/tools"
+}
+
+task prepareWinJDK(type: Copy) {
+    from zipTree('runtime/windows/jdk8.zip')
+    into "version/windows/version/${project.name}"
+}
+
+task zipWin(type: Zip, dependsOn: [prepareWinJar, prepareWinSetup, prepareWinTools, prepareWinJDK]) {
+    from 'version/windows/version'
+    destinationDirectory = file('version/windows')
+    archiveFileName = "${project.name}-${project.ext.version.code}.zip"
+}
+
+task releaseWin(type: Delete, dependsOn: [zipWin]) {
+    delete 'version/windows/version'
+}
+
+//======================= Release (Linux) ========================//
+task prepareLinuxJar(type: Copy, dependsOn: build) {
+    from "${buildDir}/libs"
+    into "version/linux/version/${project.name}"
+    rename("${project.name}-${project.ext.version.code}.jar", "${project.name}.jar")
+}
+
+task prepareLinuxSetup(type: Copy) {
+    from 'runtime/linux/setup'
+    into "version/linux/version/${project.name}"
+    rename("^[s]ervice", "${project.name}")
+    filter(ReplaceTokens, tokens: [projectName: project.name, version: project.ext.version.code])
+}
+
+task prepareLinuxTools(type: Copy) {
+    from 'runtime/linux/tools'
+    into "version/linux/version/${project.name}/tools"
+}
+
+task zipLinux(type: Zip, dependsOn: [prepareLinuxJar, prepareLinuxSetup, prepareLinuxTools]) {
+    from 'version/linux/version'
+    destinationDirectory = file('version/linux')
+    archiveFileName = "${project.name}-${project.ext.version.code}.zip"
+}
+
+task releaseLinux(type: Delete, dependsOn: [zipLinux]) {
+    delete 'version/linux/version'
+}
+
+//======================= Clean ========================//
+task cleanRelease(type: Delete) {
+    delete 'version'
+}
+
+clean.dependsOn cleanRelease

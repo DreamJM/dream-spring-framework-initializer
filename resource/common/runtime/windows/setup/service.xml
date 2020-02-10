@@ -1,0 +1,11 @@
+<service> 
+    <id>@projectName@</id>
+    <name>@projectName@</name>
+    <description>@projectName@</description>
+    <env name="JAVA_HOME" value="%BASE%\jdk8"/>
+    <executable>%BASE%\jdk8\bin\java.exe</executable>
+    <arguments>-jar "%BASE%\@projectName@.jar" -server -XX:+HeapDumpOnOutOfMemoryError -Xms1G -Xmx4G</arguments>
+    <startmode>Automatic</startmode>
+    <logpath>%BASE%\logs</logpath>
+    <logmode>rotate</logmode>
+</service>

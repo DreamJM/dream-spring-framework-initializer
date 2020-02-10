@@ -1,0 +1,1 @@
+INSERT INTO @init.dbPrefix@system_info(version_code,version_id,update_time,description) VALUES('{{version}}','{{versionId}}',CURRENT_TIMESTAMP,'{{desc}}') ON DUPLICATE KEY UPDATE description=VALUES(description);

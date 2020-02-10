@@ -1,0 +1,101 @@
+#!/bin/bash
+#chkconfig:35 70 30
+#description:@projectName@ service
+
+source /etc/profile
+
+SERVICE_NAME="@projectName@"
+SERVICE_HOME_NAME=`echo "${SERVICE_NAME}_HOME" | tr 'a-z' 'A-Z'`
+SERVICE_HOME="\$$SERVICE_HOME_NAME"
+SERVICE_PATH=`eval echo "$SERVICE_HOME"`
+
+JAVA_EXECUTABLE=java
+
+if [[ -d ${SERVICE_PATH:-'.'}/j2sdk-image ]];then
+    export JAVA_HOME=${SERVICE_PATH:-'.'}/j2sdk-image
+    JAVA_EXECUTABLE=${JAVA_HOME}/bin/java
+fi
+
+function start()
+{
+	count=`ps -ef |grep java|grep ${SERVICE_NAME}|wc -l`
+	if [ $count != 0 ];then
+		echo "Maybe ${SERVICE_NAME} is running, please check it..."
+	else
+		echo "The ${SERVICE_NAME} is starting..."
+		nohup ${JAVA_EXECUTABLE} -jar ${SERVICE_PATH:-'.'}/${SERVICE_NAME}.jar -server -XX:+HeapDumpOnOutOfMemoryError -Xms1G -Xmx4G --logging.file=${SERVICE_PATH}/logs/@projectName@.log > /dev/null 2>&1 &
+	fi
+}
+
+function stop()
+{
+	appId=`ps -ef |grep java|grep ${SERVICE_NAME}|awk '{print $2}'`
+	if [ -z $appId ];then
+	    echo "Maybe ${SERVICE_NAME} not running, please check it..."
+	else
+        echo "The ${SERVICE_NAME} is stopping..."
+        kill $appId
+	fi
+}
+
+function restart()
+{
+    stop
+    for i in {5..1}
+    do
+        echo -n "$i "
+        sleep 1
+    done
+    echo 0
+
+    start
+}
+
+function status()
+{
+    appId=`ps -ef |grep java|grep ${SERVICE_NAME}|awk '{print $2}'`
+	if [ -z $appId ]
+	then
+	    echo -e "\033[31m Not running \033[0m"
+	else
+	    echo -e "\033[32m Running [$appId] \033[0m"
+	fi
+}
+
+function forceKill()
+{
+	appId=`ps -ef |grep java|grep ${SERVICE_NAME}|awk '{print $2}'`
+	if [ -z $appId ];then
+	    echo "Maybe ${SERVICE_NAME} not running, please check it..."
+	else
+        echo "Killing ${SERVICE_NAME}..."
+        kill -9 $appId
+	fi
+}
+
+function usage()
+{
+    echo "Usage: $0 {start|stop|restart|status|stop|kill-9}"
+    echo "Example: $0 start"
+    exit 1
+}
+
+case $1 in
+	start)
+	start;;
+
+	stop)
+	stop;;
+
+	restart)
+	restart;;
+
+	status)
+	status;;
+
+    kill-9)
+	forceKill;;
+
+	*)
+	usage;;
+esac
