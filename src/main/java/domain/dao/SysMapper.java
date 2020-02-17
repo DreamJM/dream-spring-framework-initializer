@@ -20,7 +20,7 @@ public interface SysMapper {
     @Select("SELECT " + COMMON_COLUMNS + " FROM @init.dbPrefix@system_info ORDER BY version_id DESC LIMIT 1")
     SysEntity loadCurrent();
 
-    @Select("<script>SELECT " + COMMON_COLUMNS + " FROM demo_system_info WHERE 1=1 " +
+    @Select("<script>SELECT " + COMMON_COLUMNS + " FROM @init.dbPrefix@system_info WHERE 1=1 " +
             "<if test='keyword!=null'>AND (version_code LIKE CONCAT('%',#{keyword},'%') OR description LIKE CONCAT('%',#{keyword},'%'))" +
             "</if></script>")
     Page<SysEntity> query(SysQuery query);
