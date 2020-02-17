@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Server information controller
  *
- * @author DreamJM
+ * @author @init.author@
  */
 @Api(tags = {"Server Information management"})
 @RestController
