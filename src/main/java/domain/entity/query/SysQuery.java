@@ -26,7 +26,7 @@ public class SysQuery extends BaseCondition {
     }
 
     public static Builder builder() {
-        return new Builder(new SysQuery());
+        return new Builder();
     }
 
     public static class Builder extends BaseQueryBuilder<SysQuery> {
@@ -41,8 +41,8 @@ public class SysQuery extends BaseCondition {
                     }
                 });
 
-        private Builder(SysQuery query) {
-            super(query);
+        private Builder() {
+            super(new SysQuery());
         }
 
         public Builder setKeyword(String keyword) {
